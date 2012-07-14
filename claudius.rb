@@ -18,20 +18,18 @@ until s.eof? do
   elsif data.split(" ")[1].start_with?("001")
     s.puts "MODE #{nick} +B"
     channels.each {|channel| s.puts "JOIN #{channel}"}
-    
-  elsif data.split(' ')[1] == 'PRIVMSG'
-    if data.split(' ')[2] == nick
-      puts '-' + data.split('!')[0].split(':')[1] + '!' + data.split(' ')[2] + '- ' + data.split(':')[2]
-    else
-      puts '-' + data.split('!')[0].split(':')[1] + data.split(' ')[2] + '- ' + data.split(':')[2]
-    end
 
-  elsif data.split(' ')[1] == 'NOTICE'
-    if data.split(' ')[2] == nick
-      puts '*' + data.split('!')[0].split(':')[1] + '!' + data.split(' ')[2] + '* ' + data.split(':')[2]
+  elsif ['PRIVMSG', 'NOTICE'].include?(data.split(' ')[1])
+    from = data.split('!')[0].split(':')[1]
+    rcpt = data.split(' ')[2]
+    body = data.split(':')[2]
+    type = data.split(' ')[1]
+    char = '-'
+    if type == 'NOTICE' char = '*'
+    if rcpt == nick
+      puts char + from + '!' + rcpt + char + ' ' + body
     else
-      puts '*' + data.split('!')[0].split(':')[1] + data.split(' ')[2] + '* ' + data.split(':')[2]
+      puts char + from + rcpt + char + ' ' + body
     end
   end
-    
 end
