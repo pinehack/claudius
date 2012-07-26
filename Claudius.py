@@ -80,17 +80,12 @@ class Claudius:
                 self.privmsg(to, 'Usage: ' + self.nick + ' $v8 [javascript]')
               else:
                 # fucked up way to get the javascript
-                javascript = msg[len(self.nick + command) + 2:].replace("\\r", '').replace("\\n", '')
-                
+                javascript = msg[len(self.nick + command) + 2:].replace("\\r", '').replace("\\n", '').replace("\\", "\\\\").replace("\"", "\\\"")
                 
                 # insecure as fuck probably
-                f = open('script.js', 'w')
-                f.write(javascript)
-                f.close()
-                
                 try:
                   # will be different depending on how you installed v8
-                  self.privmsg(to, subprocess.check_output('v8 script.js', shell=True))
+                  self.privmsg(to, subprocess.check_output('v8 -e "' + javascript + '"', shell=True))
                 except subprocess.CalledProcessError:
                   self.privmsg(to, 'There were errors in your script')
             
