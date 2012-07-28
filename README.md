@@ -18,7 +18,6 @@ from this simple feature.
 For instance, if I wanted to have a decision decided for me, I could execute
 the following
 ```
-claudius $v8 if(Math.random() < 0.5){ print("option one"); } else {
-print("option two"); }
+claudius $v8 if(Math.random() < 0.5){ print("option one"); } else { print("option two"); }
 ```
 and from that, claudius would either print `option one` or `option two`.
