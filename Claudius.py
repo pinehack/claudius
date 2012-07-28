@@ -4,6 +4,7 @@ import subprocess
 
 class Claudius:
   def __init__(self):
+    
     self.s = socket.socket()
     
     self.host = None
@@ -21,10 +22,10 @@ class Claudius:
   def setNick(self, nick):
     self.nick = nick
   
-  def join(self, channel):
+  def _join(self, channel):
     if self.connected:
       self.s.send('JOIN ' + channel + "\r\n")
-      print 'Joined ' + channel
+      print('Joined ' + channel)
   
   def privmsg(self, to, msg):
     if self.connected:
@@ -46,10 +47,54 @@ class Claudius:
         if data.split(' ')[1] == '001':
           self.s.send('MODE ' + self.nick + " +B\r\n")
           self.connected = True
-          print 'Connected and identified'
+          print('Connected and identified')
           break
   
-  def mainloop(self):
+  def parse(self, msg, to):
+    if msg.count(' ') >= 2:
+      # commands that take no args
+      command = msg.split(' ')[1]
+      
+      if command == '$v8':
+        if msg.split(' ')[2] == '--help':
+          self.privmsg(to, 'Usage: ' + self.nick + ' $v8 [javascript]')
+        else:
+          # fucked up way to get the javascript
+          javascript = msg[len(self.nick + command) + 2:].replace("\\", "\\\\").replace("\"", "\\\"")
+          
+          # insecure as fuck probably
+          try:
+            # will be different depending on how you installed v8
+            self.privmsg(to, subprocess.check_output('v8 -e "' + javascript + '"', shell=True).replace("\r", '').replace("\n", ''))
+          except subprocess.CalledProcessError:
+            self.privmsg(to, 'There were errors in your script')
+      
+      if command == '$b64' and msg.count(' ') == 2:
+        self.privmsg(to, 'Usage: ' + self.nick + ' $b64 --encode message')
+        self.privmsg(to, '       ' + self.nick + ' $b64 --decode bWVzc2FnZQ==')
+      
+      if command == '$bin':
+        try:
+          self.privmsg(to, bin(int(msg.split(' ')[2])))
+        except ValueError:
+          self.privmsg(to, 'Invalid argument given')
+      
+      if command == '$hex':
+        try:
+          self.privmsg(to, hex(int(msg.split(' ')[2])))
+        except ValueError:
+          self.privmsg(to, 'Invalid argument given')
+    
+    if msg.count(' ') >= 3:
+      if command == '$b64':
+        flag = msg.split(' ')[2]
+        text = msg[len(self.nick + command + flag) + 3:]
+        if flag == '--encode':
+          self.privmsg(to, base64.b64encode(text))
+        elif flag == '--decode':
+          self.privmsg(to, base64.b64decode(text))
+  
+  def start(self):
     if self.connected:
       while 1:
         data = self.s.recv(512)
@@ -69,48 +114,6 @@ class Claudius:
           # fucked up way to get the message
           msg = data[data.index(':', 1):].strip()[1:]
           
-          print '[' + sender + '] ' + msg
+          print('[' + sender + '] ' + msg)
           
-          if msg.count(' ') >= 2:
-            # commands that take no args
-            command = msg.split(' ')[1]
-            
-            if command == '$v8':
-              if msg.split(' ')[2] == '--help':
-                self.privmsg(to, 'Usage: ' + self.nick + ' $v8 [javascript]')
-              else:
-                # fucked up way to get the javascript
-                javascript = msg[len(self.nick + command) + 2:].replace("\\r", '').replace("\\n", '').replace("\\", "\\\\").replace("\"", "\\\"")
-                
-                # insecure as fuck probably
-                try:
-                  # will be different depending on how you installed v8
-                  self.privmsg(to, subprocess.check_output('v8 -e "' + javascript + '"', shell=True))
-                except subprocess.CalledProcessError:
-                  self.privmsg(to, 'There were errors in your script')
-            
-            if command == '$b64' and msg.count(' ') == 2:
-              self.privmsg(to, 'Usage: ' + self.nick + ' $b64 --encode message')
-              self.privmsg(to, '       ' + self.nick + ' $b64 --decode bWVzc2FnZQ==')
-            
-            if command == '$bin':
-              try:
-                self.privmsg(to, bin(int(msg.split(' ')[2])))
-              except ValueError:
-                self.privmsg(to, 'Invalid argument given')
-            
-            if command == '$hex':
-              try:
-                self.privmsg(to, hex(int(msg.split(' ')[2])))
-              except ValueError:
-                self.privmsg(to, 'Invalid argument given')
-          
-          if msg.count(' ') >= 3:
-            if command == '$b64':
-              flag = msg.split(' ')[2]
-              text = msg[len(self.nick + command + flag) + 3:]
-              print text
-              if flag == '--encode':
-                self.privmsg(to, base64.b64encode(text))
-              elif flag == '--decode':
-                self.privmsg(to, base64.b64decode(text))
+          self.parse(msg, to)
