@@ -25,5 +25,5 @@ and from that, claudius would either print `option one` or `option two`.
 Since I have too much spare time on my hands, I devised a function that will
 do this 100 times and pick the most guessed answer.
 ```
-function decide(one,two){var w=100;var y=0;var z=new Array();for(var x=0;x<w;x++){z[x]=Math.random();}for(var x=0;x<w;x++){y+=z[x];}if((y/w)>0.5){print(one);}else{print(two);}}
+function decide(one,two){w=100;y=0;for(x=0;x<w;x++){y+=Math.random();}if((y/w)>0.5){print(one);}else{print(two);}}
 ```
