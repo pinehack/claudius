@@ -1,5 +1,4 @@
 from Claudius import *
-from Tkinter import Tk
 
 
 bot = Claudius()
