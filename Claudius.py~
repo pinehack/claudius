@@ -117,7 +117,7 @@ class Parse(threading.Thread):
         except ValueError:
           self.claudius.privmsg(self.to, 'Invalid argument given')
     
-    if self.msg.count(' ') >= 3:
+    if msg.count(' ') >= 3:
       if command == '$b64':
         flag = self.msg.split(' ')[2]
         text = self.msg[len(self.claudius.nick + command + flag) + 3:]
