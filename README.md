@@ -21,3 +21,9 @@ the following
 claudius $v8 if(Math.random() < 0.5){ print("option one"); } else { print("option two"); }
 ```
 and from that, claudius would either print `option one` or `option two`.
+
+Since I have too much spare time on my hands, I devised a script that will
+do this 100 times and pick the most guessed answer.
+```
+function decide(one,two){var w=100;var y=0;var z=new Array();for(var x=0;x<w;x++){z[x]=Math.random();}for(var x=0;x<w;x++){y+=z[x];}if((y/w)>0.5){print(one);}else{print(two);}}
+```
