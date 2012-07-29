@@ -8,6 +8,5 @@ bot.setNick('claudius')
 bot.connect()
 
 bot.join('#jakash3')
-bot.join('#room2')
 
 bot.start()

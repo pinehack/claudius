@@ -95,11 +95,8 @@ class Parse(threading.Thread):
           javascript = self.msg[len(self.claudius.nick + command) + 2:].replace("\\", "\\\\").replace("\"", "\\\"").replace("$", "\$")
           
           # insecure as fuck probably
-          try:
-            # will be different depending on how you installed v8
-            self.claudius.privmsg(self.to, subprocess.check_output('v8 -e "' + javascript + '"', shell=True).replace("\r", '').replace("\n", ''))
-          except subprocess.CalledProcessError:
-            self.claudius.privmsg(self.to, 'There were errors in your script')
+          # will be different depending on how you installed v8
+          self.claudius.privmsg(self.to, self.command(javascript).replace("\r", '').replace("\n", ''))
       
       if command == '$b64' and msg.count(' ') == 2:
         self.claudius.privmsg(self.to, 'Usage: ' + self.claudius.nick + ' $b64 --encode message')
@@ -125,3 +122,21 @@ class Parse(threading.Thread):
           self.claudius.privmsg(to, base64.b64encode(text))
         elif flag == '--decode':
           self.claudius.privmsg(to, base64.b64decode(text))
+  
+  def command(self, cmd):
+    self.output = 'Maximum prcessing time is 15 seconds'
+    def target():
+      try:
+        self.ouput = subprocess.check_output(['/usr/local/bin/v8', '-e', '"' + cmd + '"'], shell=True)
+      except subprocess.CalledProcessError:
+        self.output = 'Error in script'
+    
+    thread = threading.Thread(target=target)
+    thread.start()
+    
+    thread.join(15)
+    thread._Thread__stop()
+    
+    return self.output
+# yes, I "copied" this from http://stackoverflow.com/questions/1191374/subprocess-with-timeout
+# yawannafiteabowdit?
