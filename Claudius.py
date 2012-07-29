@@ -92,7 +92,7 @@ class Parse(threading.Thread):
           self.claudius.privmsg(to, 'Usage: ' + self.claudius.nick + ' $v8 [javascript]')
         else:
           # fucked up way to get the javascript
-          javascript = self.msg[len(self.claudius.nick + command) + 2:].replace("\\", "\\\\").replace("\"", "\\\"")
+          javascript = self.msg[len(self.claudius.nick + command) + 2:].replace("\\", "\\\\").replace("\"", "\\\"").replace("$", "\$")
           
           # insecure as fuck probably
           try:
